@@ -1,0 +1,567 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 10.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     26000,        559]
+NotebookOptionsPosition[     24412,        523]
+NotebookOutlinePosition[     24849,        542]
+CellTagsIndexPosition[     24806,        539]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Convex Cap Make & DS ", "Title",
+ CellChangeTimes->{{3.604592400277894*^9, 3.604592442280909*^9}, {
+  3.6161751893731203`*^9, 3.6161751921598873`*^9}, {3.616233081838628*^9, 
+  3.6162330854373837`*^9}, {3.616277853093804*^9, 3.6162778655703363`*^9}, {
+  3.616336865695582*^9, 3.61633687399676*^9}, {3.655737364731365*^9, 
+  3.655737372145384*^9}},
+ Background->RGBColor[0.94, 0.91, 0.88]],
+
+Cell["\<\
+JOR 5Nov2015
+Removed cap & bdry fncs 9 Ot 2018, for Zoe\
+\>", "Subtitle",
+ CellChangeTimes->{{3.6045924160858583`*^9, 3.6045924271812363`*^9}, {
+  3.616277869211132*^9, 3.616277885386209*^9}, {3.616336857033277*^9, 
+  3.616336857421995*^9}, {3.655737376873727*^9, 3.655737378928864*^9}, {
+  3.700571945921682*^9, 3.700571946975255*^9}, {3.748074189645735*^9, 
+  3.7480742222864122`*^9}},
+ Background->RGBColor[
+  0.94, 0.91, 0.88],ExpressionUUID->"4c0ec99a-e242-4901-b19c-8f78c50d7739"],
+
+Cell[TextData[{
+ "Assume these are run:\n\t",
+ StyleBox["Triangle.Angles.nb\n\tConvexPolyhedronMake.nb\n\tPolyhedronDS.nb",
+  FontWeight->"Bold"],
+ "\nThen we have a complete DS for a complete polyhedron.\nThis ",
+ StyleBox["nb",
+  FontWeight->"Bold"],
+ " then reduces the polyhedron to a cap, and alters & augments the DS \
+accordingly.\nThis is a major revision of ConvexCapDS.nb from Aug2014."
+}], "Subsubsection",
+ CellChangeTimes->{{3.6045924160858583`*^9, 3.6045924271812363`*^9}, {
+  3.6161754139452133`*^9, 3.616175497432034*^9}, {3.616175586776231*^9, 
+  3.616175598760043*^9}, {3.616276272127399*^9, 3.6162763590569563`*^9}, {
+  3.6162777704309053`*^9, 3.616277816002232*^9}, {3.655737394624604*^9, 
+  3.655737553002*^9}},
+ Background->RGBColor[
+  0.94, 0.91, 0.88],ExpressionUUID->"dc2442ec-4c9a-4517-8080-857fa3792e89"],
+
+Cell[CellGroupData[{
+
+Cell["Triangle.Angles.nb", "Subchapter",
+ CellChangeTimes->{{3.6473361557518806`*^9, 3.647336272463933*^9}, {
+  3.647337218010086*^9, 3.647337219120063*^9}},
+ Background->RGBColor[0.94, 0.91, 0.88]],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"DebugTri", "=", "False"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"DebugPlane", "=", "False"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"debug", "=", "False"}], ";", 
+  RowBox[{"debug1", "=", "False"}], ";"}]}], "Input",
+ CellLabel->
+  "In[162]:=",ExpressionUUID->"3374124f-0b2e-4264-bad4-afb66f0e059d"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["ConvexPolyhedronMake.nb", "Subchapter",
+ CellChangeTimes->{{3.6473361557518806`*^9, 3.647336272463933*^9}, {
+  3.647337222368222*^9, 3.647337228344687*^9}},
+ Background->RGBColor[0.94, 0.91, 0.88]],
+
+Cell[TextData[{
+ "{a_,b_,c_} = axes, e.g., {100,100,100}\nModifying to hardwire pts. I.e., if \
+|pts|>0, uses pts rather than random generation.\nSo create pts, leave as \
+global, and pts will be used.\n\nModifying again:\n",
+ StyleBox["DoCreatePolyh[seed_, npts_, {a_, b_, c_}, pts_, how_]\nhow: {\
+\[OpenCurlyDoubleQuote]rand\[CloseCurlyDoubleQuote], \
+\[OpenCurlyDoubleQuote]pts\[CloseCurlyDoubleQuote], \
+\[OpenCurlyDoubleQuote]faces\[CloseCurlyDoubleQuote], \
+\[OpenCurlyDoubleQuote]ccap\[CloseCurlyDoubleQuote]}\n   \
+\[OpenCurlyDoubleQuote]rand\[CloseCurlyDoubleQuote]: generate npts random on \
+sphere/ellipsoid.\n   \[OpenCurlyDoubleQuote]pts\[CloseCurlyDoubleQuote]: \
+generate from given 3D points & hull\n   \[OpenCurlyDoubleQuote]faces\
+\[CloseCurlyDoubleQuote]: ",
+  Background->RGBColor[0.94, 0.91, 0.88]],
+ "{",
+ StyleBox["verts3d, faces",
+  FontSlant->"Italic"],
+ "} pre-computed, the output of hull.\n   \[OpenCurlyDoubleQuote]ccap\
+\[CloseCurlyDoubleQuote]: Specialize to cap & rim @ \[Phi]."
+}], "Text",
+ CellChangeTimes->{{3.6473401613217382`*^9, 3.6473401690941877`*^9}, {
+   3.647340276677206*^9, 3.647340281035983*^9}, {3.647340327623825*^9, 
+   3.647340339880438*^9}, {3.647349091024291*^9, 3.64734909769634*^9}, {
+   3.64744426745728*^9, 3.647444268175222*^9}, {3.647444310852872*^9, 
+   3.647444311860952*^9}, {3.6474444182557364`*^9, 3.647444419102161*^9}, {
+   3.6474447654387302`*^9, 3.647444766660645*^9}, {3.64744493670245*^9, 
+   3.647444937174905*^9}, {3.647444970049993*^9, 3.647444970682094*^9}, {
+   3.647445256491106*^9, 3.647445338806467*^9}, {3.647445415674327*^9, 
+   3.6474454166022987`*^9}, {3.64744558576186*^9, 3.6474455863773537`*^9}, {
+   3.647445618354026*^9, 3.647445622703444*^9}, 3.6557378049201593`*^9, {
+   3.658680549889921*^9, 3.658680559585814*^9}, {3.6587500002505703`*^9, 
+   3.658750008202324*^9}, {3.6712692151663513`*^9, 3.6712692718335657`*^9}, {
+   3.673019076210127*^9, 3.67301908149648*^9}, {3.728812830395331*^9, 
+   3.728812845266675*^9}, {3.728812914849527*^9, 3.72881293285682*^9}},
+ Background->RGBColor[
+  0.94, 0.91, 0.88],ExpressionUUID->"2f917bd7-804f-4e4c-b6da-cc8db22c2c8a"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"DoCreatePolyh", "[", 
+     RowBox[{"seed_", ",", "npts_", ",", 
+      RowBox[{"{", 
+       RowBox[{"a_", ",", "b_", ",", "c_"}], "}"}], ",", "pts_", ",", " ", 
+      "how_", ",", "\[Phi]_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"g", ",", "rpts"}], "}"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"(*", 
+       RowBox[{"Use", " ", "|", "pts", "|", " ", 
+        RowBox[{
+        "as", " ", "trigger", " ", "for", " ", "random", " ", "or", " ", 
+         "hardwired"}]}], "*)"}], "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"Print", "[", 
+        RowBox[{"\"\<DoCreatePolyh:{seed,npts,|pts|}=\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{"seed", ",", "npts", ",", 
+           RowBox[{"Length", "[", "pts", "]"}]}], "}"}]}], "]"}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{"how", "\[Equal]", "\"\<rand\>\""}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"SeedRandom", "[", "seed", "]"}], ";", 
+          "\[IndentingNewLine]", 
+          RowBox[{"rpts", "=", 
+           RowBox[{"RandSphere", "[", 
+            RowBox[{"npts", ",", "a", ",", "b", ",", "c"}], "]"}]}], ";", 
+          "\[IndentingNewLine]", 
+          RowBox[{"(*", 
+           RowBox[{
+            RowBox[{"Print", "[", "rpts", "]"}], ";"}], "*)"}], 
+          "\[IndentingNewLine]", 
+          RowBox[{"CreatePolyh", "[", "rpts", "]"}], ";"}]}], 
+        RowBox[{"(*", 
+         RowBox[{"=", 
+          RowBox[{">", 
+           RowBox[{"{", 
+            RowBox[{"verts3d", ",", "faces"}], "}"}]}]}], "*)"}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       "\[IndentingNewLine]", 
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{"how", "\[Equal]", "\"\<ccap\>\""}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"SeedRandom", "[", "seed", "]"}], ";", 
+          "\[IndentingNewLine]", 
+          RowBox[{"rpts", "=", 
+           RowBox[{"RandSphereCap", "[", 
+            RowBox[{"npts", ",", "\[Phi]"}], "]"}]}], ";", 
+          "\[IndentingNewLine]", 
+          RowBox[{"(*", 
+           RowBox[{
+            RowBox[{"Print", "[", "rpts", "]"}], ";"}], "*)"}], 
+          "\[IndentingNewLine]", 
+          RowBox[{"CreatePolyh", "[", "rpts", "]"}], ";"}]}], 
+        RowBox[{"(*", 
+         RowBox[{"=", 
+          RowBox[{">", 
+           RowBox[{"{", 
+            RowBox[{"verts3d", ",", "faces"}], "}"}]}]}], "*)"}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       "\[IndentingNewLine]", 
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{"how", "\[Equal]", " ", "\"\<pts\>\""}], ",", 
+         RowBox[{"(*", 
+          RowBox[{"npts", " ", "ignored"}], "*)"}], "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"CreatePolyh", "[", "pts", "]"}], ";"}]}], 
+        RowBox[{"(*", 
+         RowBox[{"=", 
+          RowBox[{">", 
+           RowBox[{"{", 
+            RowBox[{"verts3d", ",", "faces"}], "}"}]}]}], "*)"}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       "\[IndentingNewLine]", 
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{"how", "\[Equal]", " ", "\"\<faces\>\""}], ",", 
+         RowBox[{"(*", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"verts3d", ",", "faces"}], "}"}], " ", "precomputed"}], 
+          "*)"}], "\[IndentingNewLine]", 
+         RowBox[{
+         "Print", "[", "\"\<DoCreatePolyh: precomputed polyhedron\>\"", 
+          "]"}]}], "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       "\[IndentingNewLine]", 
+       RowBox[{"If", "[", 
+        RowBox[{"debug", ",", 
+         RowBox[{"Print", "[", 
+          RowBox[{"\"\<DoCreatePolyh:#verts3d=\>\"", ",", 
+           RowBox[{"Length", "[", "verts3d", "]"}]}], "]"}]}], "]"}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"If", "[", 
+        RowBox[{"debug", ",", 
+         RowBox[{"Print", "[", 
+          RowBox[{"\"\<DoCreatePolyh:#faces=\>\"", ",", 
+           RowBox[{"Length", "[", "faces", "]"}]}], "]"}]}], "]"}], ";", 
+       "\[IndentingNewLine]", "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+        "3", "D", " ", "not", " ", "needed", " ", "for", " ", "flat", " ", 
+         RowBox[{"polyh", ":"}]}], "*)"}], "\[IndentingNewLine]", 
+       RowBox[{"If", "[", 
+        RowBox[{"debug", ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"g", "=", 
+           RowBox[{"Graphics3D", "[", 
+            RowBox[{
+             RowBox[{"{", "\[IndentingNewLine]", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{
+                 RowBox[{"Opacity", "[", "0.85", "]"}], ",", 
+                 RowBox[{"GraphicsComplex", "[", 
+                  RowBox[{"verts3d", ",", 
+                   RowBox[{"Polygon", "[", "faces", "]"}]}], "]"}]}], "}"}], 
+               ",", 
+               RowBox[{"{", 
+                RowBox[{"Blue", ",", 
+                 RowBox[{"VertsLabels", "[", 
+                  RowBox[{"Range", "[", 
+                   RowBox[{"Length", "[", "faces", "]"}], "]"}], "]"}]}], 
+                "}"}], ",", 
+               RowBox[{"{", 
+                RowBox[{"Red", ",", 
+                 RowBox[{"TriLabels", "[", 
+                  RowBox[{"Range", "[", 
+                   RowBox[{"Length", "[", "faces", "]"}], "]"}], "]"}]}], 
+                "}"}], ","}], "\[IndentingNewLine]", 
+              RowBox[{"(*", 
+               RowBox[{"{", 
+                RowBox[{"Purple", ",", 
+                 RowBox[{"Point", "[", "verts3d", "]"}]}], "}"}], "*)"}], 
+              "\[IndentingNewLine]", "}"}], "\[IndentingNewLine]", ",", 
+             RowBox[{"Boxed", "\[Rule]", "False"}], "\[IndentingNewLine]", 
+             ",", 
+             RowBox[{"ImageSize", "\[Rule]", "Tiny"}]}], "]"}]}], ";", 
+          "\[IndentingNewLine]", 
+          RowBox[{"Print", "[", "g", "]"}], ";"}]}], "\[IndentingNewLine]", 
+        "]"}], ";"}]}], 
+     RowBox[{"(*", "Ifd", "*)"}], "\[IndentingNewLine]", "]"}]}], ";"}], 
+  RowBox[{"(*", "DoCreatePolyh", "*)"}]}]], "Input",
+ CellChangeTimes->{{3.647337110790675*^9, 3.6473371132224293`*^9}, {
+   3.6473371706333637`*^9, 3.64733720418843*^9}, 3.6473402303817997`*^9, 
+   3.647340304544396*^9, 3.647340349954651*^9, 3.647348038219275*^9, 
+   3.6473485454830933`*^9, {3.64734904714389*^9, 3.647349047604595*^9}, {
+   3.647443988356163*^9, 3.647443988856476*^9}, {3.647444272017733*^9, 
+   3.647444272673644*^9}, {3.647444382040256*^9, 3.6474443825238123`*^9}, {
+   3.647444422122982*^9, 3.6474444227297163`*^9}, {3.64744471769145*^9, 
+   3.6474447181939173`*^9}, {3.647444773256048*^9, 3.647444773383923*^9}, {
+   3.6474448839940453`*^9, 3.647444884208928*^9}, {3.647444941207389*^9, 
+   3.647444941509804*^9}, {3.6474449924204817`*^9, 3.647444994587425*^9}, {
+   3.647445048729536*^9, 3.64744504977064*^9}, {3.6474451224212847`*^9, 
+   3.647445122724326*^9}, {3.647445229967207*^9, 3.647445230414904*^9}, {
+   3.6474452606860447`*^9, 3.647445315808078*^9}, {3.6474453493556356`*^9, 
+   3.647445349432393*^9}, 3.6474455307332163`*^9, {3.6474455670212793`*^9, 
+   3.647445567412714*^9}, {3.647515971672269*^9, 3.6475159721019297`*^9}, {
+   3.6475160459241323`*^9, 3.647516046082741*^9}, {3.6475161036317377`*^9, 
+   3.647516104015417*^9}, {3.6475161483105392`*^9, 3.647516148685211*^9}, {
+   3.64751618561213*^9, 3.647516186658863*^9}, {3.647516877545782*^9, 
+   3.647516877990575*^9}, {3.647516936597116*^9, 3.647516937515457*^9}, {
+   3.6475169887533817`*^9, 3.647516989448752*^9}, {3.6475170224642487`*^9, 
+   3.647517022550871*^9}, {3.647521267421331*^9, 3.647521267640291*^9}, {
+   3.647521465079113*^9, 3.647521518923046*^9}, 3.647521582427094*^9, {
+   3.6475216964264*^9, 3.6475216966652403`*^9}, {3.6475296355030117`*^9, 
+   3.64752963585579*^9}, {3.64752990101515*^9, 3.6475299021399193`*^9}, {
+   3.6475300536052313`*^9, 3.647530053724805*^9}, {3.6475345802051783`*^9, 
+   3.647534591073904*^9}, {3.647534628960198*^9, 3.647534634864665*^9}, 
+   3.647534666954009*^9, 3.6475347009236717`*^9, {3.647534877504138*^9, 
+   3.647534877900589*^9}, 3.647534989210984*^9, {3.647535028591179*^9, 
+   3.647535028765607*^9}, {3.647535079088839*^9, 3.647535110489459*^9}, 
+   3.647535157330781*^9, {3.64761532059352*^9, 3.6476153239557467`*^9}, {
+   3.6476153586246758`*^9, 3.647615465691023*^9}, {3.64761551205214*^9, 
+   3.64761551229025*^9}, {3.647615555010661*^9, 3.647615555424067*^9}, {
+   3.6476156028834467`*^9, 3.647615629926787*^9}, {3.647615671543125*^9, 
+   3.647615671933929*^9}, {3.647615733501609*^9, 3.647615739435733*^9}, {
+   3.6476157791501417`*^9, 3.6476157795702963`*^9}, {3.647615818546575*^9, 
+   3.647615818889307*^9}, {3.64761586816916*^9, 3.6476158684959803`*^9}, {
+   3.647615967838346*^9, 3.647615990092063*^9}, {3.6476161724283237`*^9, 
+   3.647616238244482*^9}, {3.6476163147961903`*^9, 3.647616315170508*^9}, {
+   3.647616387498435*^9, 3.6476163876164007`*^9}, {3.647616429920639*^9, 
+   3.647616430214819*^9}, {3.6476164729767933`*^9, 3.64761647354951*^9}, {
+   3.6476165215739822`*^9, 3.6476165221803007`*^9}, {3.6476165989632874`*^9, 
+   3.647616599521964*^9}, {3.647616688560828*^9, 3.647616688966967*^9}, {
+   3.647616764333968*^9, 3.647616764844345*^9}, {3.647617612382762*^9, 
+   3.647617615476945*^9}, {3.6476189773833838`*^9, 3.6476189805568123`*^9}, {
+   3.647622317117405*^9, 3.647622332536849*^9}, 3.6476230495798483`*^9, {
+   3.6476231403127403`*^9, 3.647623145005987*^9}, {3.647623261130883*^9, 
+   3.6476232863545227`*^9}, 3.647623545795805*^9, {3.647680045542856*^9, 
+   3.6476800488553743`*^9}, {3.647680181309866*^9, 3.647680219172943*^9}, {
+   3.6476803091094646`*^9, 3.647680449275117*^9}, {3.647680554420813*^9, 
+   3.647680556927404*^9}, {3.647680638634605*^9, 3.647680666188884*^9}, {
+   3.64768199689494*^9, 3.647681997075118*^9}, {3.647682048948975*^9, 
+   3.647682049209635*^9}, 3.6476824943446417`*^9, {3.647682557300233*^9, 
+   3.647682562897936*^9}, 3.6476826463547173`*^9, 3.64768270683891*^9, 
+   3.647685105001564*^9, {3.647685147837441*^9, 3.647685148307559*^9}, {
+   3.647685184019264*^9, 3.647685184138454*^9}, {3.64768591641046*^9, 
+   3.647685934252239*^9}, {3.64768598480352*^9, 3.647685985538322*^9}, {
+   3.649071192200152*^9, 3.649071267726719*^9}, 3.6490713031194*^9, {
+   3.649071460927943*^9, 3.649071481216576*^9}, {3.649071683289345*^9, 
+   3.64907174791908*^9}, {3.649071809000741*^9, 3.649071843720183*^9}, {
+   3.649072356634034*^9, 3.6490723568085213`*^9}, {3.6490731130750637`*^9, 
+   3.649073134785603*^9}, {3.649073258395063*^9, 3.6490732983226213`*^9}, {
+   3.6490734786029577`*^9, 3.649073499114271*^9}, {3.64907353597066*^9, 
+   3.649073536106086*^9}, 3.649073908492207*^9, {3.64907559075771*^9, 
+   3.649075626821081*^9}, {3.6490756697762547`*^9, 3.649075673479125*^9}, {
+   3.649075793205894*^9, 3.649075794998025*^9}, {3.649075835631336*^9, 
+   3.649075872501951*^9}, {3.649076332839897*^9, 3.6490763603017883`*^9}, 
+   3.6490767833432198`*^9, {3.64907684647812*^9, 3.64907688228615*^9}, {
+   3.64907692615845*^9, 3.6490769265262337`*^9}, {3.649077428975586*^9, 
+   3.649077436726501*^9}, {3.649082230245822*^9, 3.649082241843754*^9}, {
+   3.649082323492469*^9, 3.649082339923719*^9}, {3.6490824451733437`*^9, 
+   3.6490824457242413`*^9}, {3.649082476004674*^9, 3.649082476612109*^9}, {
+   3.649082662110113*^9, 3.649082671052348*^9}, {3.649169871370735*^9, 
+   3.64916994799959*^9}, {3.649170092017232*^9, 3.649170092424039*^9}, {
+   3.649170178753501*^9, 3.6491701794400787`*^9}, 3.649170229385694*^9, {
+   3.649170637874031*^9, 3.6491706380884943`*^9}, {3.649170758009441*^9, 
+   3.649170762936689*^9}, {3.6491714522666397`*^9, 3.649171454377514*^9}, {
+   3.6491716385306597`*^9, 3.6491716387293262`*^9}, 3.6491716911548243`*^9, {
+   3.649171753634758*^9, 3.649171754137405*^9}, {3.649259752661593*^9, 
+   3.6492597611312532`*^9}, {3.649349393331623*^9, 3.6493494247599173`*^9}, 
+   3.649349793116859*^9, {3.649351294563002*^9, 3.649351295096418*^9}, {
+   3.649353319283918*^9, 3.649353348537498*^9}, {3.6495876455605497`*^9, 
+   3.649587654974703*^9}, {3.649591886076756*^9, 3.6495918912673883`*^9}, {
+   3.655737814416442*^9, 3.655737862093812*^9}, {3.65573789434125*^9, 
+   3.655737896403734*^9}, 3.655738303017988*^9, {3.655739272905699*^9, 
+   3.6557393130771027`*^9}, {3.655740214806724*^9, 3.655740215245181*^9}, {
+   3.6557403103534937`*^9, 3.6557403135447197`*^9}, 3.6558168025980587`*^9, 
+   3.6558168496985083`*^9, 3.655986266036756*^9, 3.656069683830518*^9, 
+   3.656257742559731*^9, {3.65685995744742*^9, 3.656860046929682*^9}, {
+   3.658673373871078*^9, 3.658673378805811*^9}, {3.658680523563961*^9, 
+   3.6586805401989937`*^9}, {3.6587499712315893`*^9, 3.658749993445376*^9}, {
+   3.658750025268362*^9, 3.658750109959041*^9}, {3.658754377492416*^9, 
+   3.6587543817775173`*^9}, {3.658754420341281*^9, 3.65875442229854*^9}, {
+   3.6712692781704197`*^9, 3.671269278938569*^9}, {3.671269350450264*^9, 
+   3.671269354775889*^9}, {3.6721479614099197`*^9, 3.672147964024262*^9}, {
+   3.6721481976925488`*^9, 3.672148275186483*^9}, {3.672148317184141*^9, 
+   3.672148326067359*^9}, {3.672148372531865*^9, 3.6721483772971363`*^9}, {
+   3.673019090537121*^9, 3.673019210810807*^9}, {3.673034539957684*^9, 
+   3.6730345432023973`*^9}, {3.673384134728306*^9, 3.6733841382856092`*^9}, 
+   3.674115885277116*^9, {3.675780854289791*^9, 3.6757809119100733`*^9}, {
+   3.693073024820841*^9, 3.693073051778975*^9}, {3.693157333489931*^9, 
+   3.6931573388011017`*^9}, {3.727192081910321*^9, 3.7271920857560062`*^9}, {
+   3.728812806440423*^9, 3.728812815725473*^9}, {3.728812852244025*^9, 
+   3.7288129055485373`*^9}},
+ CellLabel->
+  "In[165]:=",ExpressionUUID->"7edb9d94-5c68-4211-9cb1-8da1d1702e09"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["PolyhedronDS.nb", "Subchapter",
+ CellChangeTimes->{{3.6473361557518806`*^9, 3.647336272463933*^9}, {
+  3.647337055249777*^9, 3.647337079072981*^9}},
+ Background->RGBColor[0.94, 0.91, 0.88]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"DoPolyhDS", "[", "]"}], ":=", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", "}"}], ",", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"Block", "[", 
+       RowBox[{
+        RowBox[{"{", "}"}], ",", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"Print", "[", 
+          RowBox[{"\"\<=>DoPolyhDS[]:#faces=\>\"", ",", 
+           RowBox[{"Length", "[", "faces", "]"}]}], "]"}], ";", 
+         RowBox[{
+          RowBox[{"{", 
+           RowBox[{"edges", ",", "adjfaces"}], "}"}], "=", 
+          RowBox[{"FindAdjFacesEdges", "[", "faces", "]"}]}], ";", 
+         "\[IndentingNewLine]", 
+         RowBox[{"Print", "[", 
+          RowBox[{"\"\<#{edges,adjfaces}=\>\"", ",", 
+           RowBox[{"Map", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"Length", "[", "#", "]"}], "&"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"edges", ",", "adjfaces"}], "}"}]}], "]"}]}], "]"}], 
+         ";", "\[IndentingNewLine]", 
+         RowBox[{"fangs", "=", 
+          RowBox[{"FindAngles", "[", "faces", "]"}]}], ";", 
+         "\[IndentingNewLine]", 
+         RowBox[{"(*", 
+          RowBox[{
+           RowBox[{"Print", "[", 
+            RowBox[{"\"\<fangs(deg)=\\n\>\"", ",", 
+             RowBox[{"fangs", " ", "RadDeg"}]}], "]"}], ";"}], "*)"}], 
+         "\[IndentingNewLine]", 
+         RowBox[{"vadjccws", "=", 
+          RowBox[{"CreateVadjs", "[", "]"}]}], ";", "\[IndentingNewLine]", 
+         RowBox[{"Print", "[", 
+          RowBox[{"\"\<#vadjccws=\>\"", ",", 
+           RowBox[{"Length", "[", "vadjccws", "]"}]}], "]"}], ";"}]}], 
+       "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"Special", " ", "code", " ", "for", " ", "zsorting", " ", 
+           RowBox[{"rmvd", ":", "\[IndentingNewLine]", "\[Omega]bot"}]}], "=", 
+          RowBox[{"CurvVertex", "[", 
+           RowBox[{
+           "zinds", "\[LeftDoubleBracket]", "1", "\[RightDoubleBracket]"}], 
+           "]"}]}], ";", "\[IndentingNewLine]", 
+         RowBox[{"\[Omega]top", "=", 
+          RowBox[{"CurvVertex", "[", 
+           RowBox[{"zinds", "\[LeftDoubleBracket]", 
+            RowBox[{"-", "1"}], "\[RightDoubleBracket]"}], "]"}]}], ";", 
+         "\[IndentingNewLine]", 
+         RowBox[{"Print", "[", 
+          RowBox[{"\"\<{\[Omega]bot,\[Omega]top}=\>\"", ",", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"\[Omega]bot", ",", "\[Omega]top"}], "}"}], " ", 
+            "RadDeg"}]}], "]"}], ";"}], "*)"}], "\[IndentingNewLine]", "]"}], 
+      ";"}]}], 
+    RowBox[{"(*", "BlockPrint", "*)"}], "\[IndentingNewLine]", "]"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.6473370817177353`*^9, 3.647337105525818*^9}, {
+   3.6474443542123337`*^9, 3.6474443581807413`*^9}, {3.6491701272403316`*^9, 
+   3.6491701450474052`*^9}, {3.655737932316073*^9, 3.655737970107688*^9}, {
+   3.655738130194394*^9, 3.655738141792872*^9}, {3.655739831183743*^9, 
+   3.6557398585886993`*^9}, {3.655816813218479*^9, 3.655816841271397*^9}, {
+   3.655986407703082*^9, 3.655986408157493*^9}, 3.656069690719617*^9, {
+   3.6568600844415903`*^9, 3.656860103623774*^9}, {3.657798140656559*^9, 
+   3.657798281353322*^9}},
+ CellLabel->
+  "In[166]:=",ExpressionUUID->"9f393104-63f0-499b-a336-6a669f73ab9a"],
+
+Cell[TextData[{
+ StyleBox["bverts",
+  FontWeight->"Bold",
+  FontSlant->"Italic"],
+ ": indices of boundary vertices, in ccw order\n",
+ StyleBox["bedges",
+  FontWeight->"Bold",
+  FontSlant->"Italic"],
+ ": boundary edges. ",
+ StyleBox["vi",
+  FontSlant->"Italic"],
+ " pairs, sorted {v1,v2}\n",
+ StyleBox["bedgeccws",
+  FontWeight->"Bold",
+  FontSlant->"Italic"],
+ ": boundary edges in ccw order. unsorted {v1,v2}\n",
+ StyleBox["badjfaces",
+  FontWeight->"Bold",
+  FontSlant->"Italic"],
+ ": {",
+ StyleBox["vi",
+  FontSlant->"Italic"],
+ ", ",
+ StyleBox["vadj",
+  FontSlant->"Italic"],
+ "} same, but only the faces adj to boundary, indexed in synch with ",
+ StyleBox["bedges",
+  FontSlant->"Italic"],
+ ".\n(",
+ StyleBox["fangs",
+  FontSlant->"Italic"],
+ ": unaltered)"
+}], "Text",
+ CellChangeTimes->{{3.655737597699347*^9, 3.6557376327424994`*^9}, {
+   3.655738214222575*^9, 3.655738272786511*^9}, {3.655739060913087*^9, 
+   3.655739061537135*^9}, {3.6558168993818893`*^9, 3.6558169240364933`*^9}, {
+   3.655816974067816*^9, 3.655816984993821*^9}, {3.655817227623033*^9, 
+   3.655817335210586*^9}, {3.655817872475005*^9, 3.6558180494433727`*^9}, 
+   3.655985720649934*^9, {3.6559857662934427`*^9, 3.65598578403463*^9}, {
+   3.677329598669997*^9, 3.6773296005485*^9}},
+ Background->RGBColor[0.94, 0.91, 0.88]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"bverts", "=", 
+   RowBox[{"bedges", "=", 
+    RowBox[{"bedgeccws", "=", 
+     RowBox[{"badjfaces", "=", 
+      RowBox[{"{", "}"}]}]}]}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.7480742750031776`*^9, 3.748074290148223*^9}},
+ CellLabel->
+  "In[167]:=",ExpressionUUID->"eea6e79e-0a65-462d-9df5-7dbdfc3e53d5"]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{1150, 705},
+WindowMargins->{{Automatic, 34}, {Automatic, 6}},
+PrintingCopies->1,
+PrintingPageRange->{1, Automatic},
+Magnification:>2. Inherited,
+FrontEndVersion->"11.3 for Mac OS X x86 (32-bit, 64-bit Kernel) (March 5, \
+2018)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 394, 6, 226, "Title",ExpressionUUID->"42cb4ce7-6a53-4f81-aaf6-cc2667cc90f2"],
+Cell[977, 30, 496, 10, 202, "Subtitle",ExpressionUUID->"4c0ec99a-e242-4901-b19c-8f78c50d7739"],
+Cell[1476, 42, 831, 16, 478, "Subsubsection",ExpressionUUID->"dc2442ec-4c9a-4517-8080-857fa3792e89"],
+Cell[CellGroupData[{
+Cell[2332, 62, 198, 3, 125, "Subchapter",ExpressionUUID->"7ba0b862-4726-47d9-9ecc-13a863571182"],
+Cell[2533, 67, 362, 9, 183, "Input",ExpressionUUID->"3374124f-0b2e-4264-bad4-afb66f0e059d"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2932, 81, 203, 3, 161, "Subchapter",ExpressionUUID->"d0d42884-470a-4f1c-abd6-8321059d8016"],
+Cell[3138, 86, 2150, 35, 596, "Text",ExpressionUUID->"2f917bd7-804f-4e4c-b6da-cc8db22c2c8a"],
+Cell[5291, 123, 13873, 257, 1887, "Input",ExpressionUUID->"7edb9d94-5c68-4211-9cb1-8da1d1702e09"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[19201, 385, 195, 3, 161, "Subchapter",ExpressionUUID->"3811c0ba-d567-4ada-8812-76e374e50788"],
+Cell[19399, 390, 3336, 76, 697, "Input",ExpressionUUID->"9f393104-63f0-499b-a336-6a669f73ab9a"],
+Cell[22738, 468, 1302, 40, 326, "Text",ExpressionUUID->"ed888474-148d-4b69-a94d-3842d6425c39"],
+Cell[24043, 510, 341, 9, 115, "Input",ExpressionUUID->"eea6e79e-0a65-462d-9df5-7dbdfc3e53d5"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
